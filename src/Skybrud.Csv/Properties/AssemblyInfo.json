@@ -1,0 +1,10 @@
+{
+  "title": "Skybrud.Csv",
+  "description": "Small library for parsing and generating CSV files",
+  "company": "Skybrud.dk",
+  "product": "Skybrud.Csv",
+  "copyright": "Copyright © 2017",
+  "version": "0.0.1.0",
+  "informationalVersion": "0.0.1",
+  "fileVersion": "0.0.1.0"
+}
