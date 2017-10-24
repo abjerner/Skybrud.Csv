@@ -12,7 +12,9 @@ namespace Skybrud.Csv {
     public class CsvFile {
 
         #region Properties
-        
+
+        public CsvSeparator Separator { get; private set; }
+
         /// <summary>
         /// Gets the path from where the CSV file was loaded.
         /// </summary>
@@ -41,6 +43,7 @@ namespace Skybrud.Csv {
         /// Initializes an empty CSV file.
         /// </summary>
         public CsvFile() {
+            Separator = CsvSeparator.SemiColon;
             Columns = new CsvColumnList(this);
             Rows = new CsvRowList(this);
         }
@@ -134,13 +137,13 @@ namespace Skybrud.Csv {
 
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="path"></param>
-        /// <returns></returns>
+        public CsvFile Save() {
+            if (String.IsNullOrWhiteSpace(Path)) throw new Exception("Property not set: Path");
+            return Save(Path, Separator, Encoding.UTF8);
+        }
+
         public CsvFile Save(string path) {
-            return Save(path, CsvSeparator.Colon, Encoding.UTF8);
+            return Save(path, Separator, Encoding.UTF8);
         }
 
         /// <summary>
@@ -155,14 +158,14 @@ namespace Skybrud.Csv {
         }
 
         /// <summary>
-        /// Saves the CSV file at the specified <paramref name="path"/>, using <see cref="CsvSeparator.Colon"/> and the
+        /// Saves the CSV file at the specified <paramref name="path"/>, using <see cref="Separator"/> and the
         /// specified <paramref name="encoding"/>.
         /// </summary>
         /// <param name="path">The path of the file to write to.</param>
         /// <param name="encoding">The encoding to be used.</param>
         /// <returns>The original instance of <see cref="CsvFile"/>.</returns>
         public CsvFile Save(string path, Encoding encoding) {
-            return Save(path, CsvSeparator.Colon, encoding);
+            return Save(path, Separator, encoding);
         }
 
         /// <summary>
@@ -181,6 +184,10 @@ namespace Skybrud.Csv {
         #endregion
 
         #region Static methods
+
+        public static CsvFile Create() {
+            return new CsvFile();
+        }
 
         /// <summary>
         /// Parses the specified <paramref name="text"/> into an instance of <see cref="CsvFile"/>, using
@@ -255,7 +262,7 @@ namespace Skybrud.Csv {
             string contents = File.ReadAllText(path, encoding ?? Encoding.UTF8).Trim();
 
             // Initialize a new CSV file
-            CsvFile file = new CsvFile { Path = path };
+            CsvFile file = new CsvFile { Separator = separator, Path = path };
 
             // Parse the contents
             ParseInternal(file, contents, separator);
@@ -263,6 +270,75 @@ namespace Skybrud.Csv {
             return file;
 
         }
+
+
+
+
+
+
+
+
+        public static CsvFile Load(Stream stream) {
+            return Load(stream, CsvSeparator.SemiColon, Encoding.UTF8);
+        }
+
+        public static CsvFile Load(Stream stream, CsvSeparator separator) {
+            return Load(stream, separator, Encoding.UTF8);
+        }
+
+        public static CsvFile Load(Stream stream, Encoding encoding) {
+            return Load(stream, CsvSeparator.SemiColon, encoding);
+        }
+
+        public static CsvFile Load(Stream stream, CsvSeparator separator, Encoding encoding) {
+
+            // Load the contents of the file/stream into a byte array
+            byte[] bytes;
+            using (BinaryReader reader = new BinaryReader(stream)) {
+                const int bufferSize = 4096;
+                using (var ms = new MemoryStream()) {
+                    byte[] buffer = new byte[bufferSize];
+                    int count;
+                    while ((count = reader.Read(buffer, 0, buffer.Length)) != 0) {
+                        ms.Write(buffer, 0, count);
+                    }
+                    bytes = ms.ToArray();
+                }
+            }
+
+            // Convert the byte array to a string (using the specified encoding)
+            string contents = encoding.GetString(bytes);
+
+            // Initialize a new CSV file
+            CsvFile file = new CsvFile { Separator = separator };
+
+            // Parse the contents
+            ParseInternal(file, contents, separator);
+
+            return file;
+
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         /// <summary>
         /// Internal helper method for parsing the contents of a CSV file.
