@@ -11,9 +11,31 @@ namespace Skybrud.Csv {
     /// </summary>
     public class CsvFile {
 
+        #region Constants
+
+        /// <summary>
+        /// Gets the default CSV separator.
+        /// </summary>
+        public const CsvSeparator DefaultSeparator = CsvSeparator.SemiColon;
+
+        /// <summary>
+        /// Gets tghe default encoding.
+        /// </summary>
+        public static Encoding DefaultEncoding => Encoding.UTF8;
+
+        #endregion
+
         #region Properties
 
-        public CsvSeparator Separator { get; private set; }
+        /// <summary>
+        /// Gets or sets the seperator used in the CSV file.
+        /// </summary>
+        public CsvSeparator Separator { get; set; }
+
+        /// <summary>
+        /// Gets or sets the encoding used in the CSV file.
+        /// </summary>
+        public Encoding Encoding { get; set; }
 
         /// <summary>
         /// Gets the path from where the CSV file was loaded.
@@ -28,22 +50,57 @@ namespace Skybrud.Csv {
         /// <summary>
         /// Gets a list of the columns of the file.
         /// </summary>
-        public CsvColumnList Columns { get; private set; }
+        public CsvColumnList Columns { get; }
 
         /// <summary>
         /// Gets a list of the rows of the file.
         /// </summary>
-        public CsvRowList Rows { get; private set; }
+        public CsvRowList Rows { get; }
 
         #endregion
 
         #region Constructors
 
         /// <summary>
-        /// Initializes an empty CSV file.
+        /// Initializes a new and empty CSV file.
         /// </summary>
         public CsvFile() {
-            Separator = CsvSeparator.SemiColon;
+            Separator = DefaultSeparator;
+            Encoding = DefaultEncoding;
+            Columns = new CsvColumnList(this);
+            Rows = new CsvRowList(this);
+        }
+
+        /// <summary>
+        /// Initializes an empty CSV file.
+        /// </summary>
+        /// <param name="separator">The separator to be used.</param>
+        public CsvFile(CsvSeparator separator) {
+            Separator = separator;
+            Encoding = DefaultEncoding;
+            Columns = new CsvColumnList(this);
+            Rows = new CsvRowList(this);
+        }
+
+        /// <summary>
+        /// Initializes an empty CSV file.
+        /// </summary>
+        /// <param name="encoding">The encoding to be used. If <c>null</c>, <see cref="DefaultEncoding"/> will be used instead.</param>
+        public CsvFile(Encoding encoding) {
+            Separator = DefaultSeparator;
+            Encoding = encoding ?? DefaultEncoding;
+            Columns = new CsvColumnList(this);
+            Rows = new CsvRowList(this);
+        }
+
+        /// <summary>
+        /// Initializes an empty CSV file.
+        /// </summary>
+        /// <param name="separator">The separator to be used.</param>
+        /// <param name="encoding">The encoding to be used. If <c>null</c>, <see cref="DefaultEncoding"/> will be used instead.</param>
+        public CsvFile(CsvSeparator separator, Encoding encoding) {
+            Separator = separator;
+            Encoding = encoding ?? DefaultEncoding;
             Columns = new CsvColumnList(this);
             Rows = new CsvRowList(this);
         }
@@ -70,11 +127,11 @@ namespace Skybrud.Csv {
         }
 
         /// <summary>
-        /// Returns a string representation of the CSV file, using <see cref="CsvSeparator.SemiColon"/> as a separator.
+        /// Returns a string representation of the CSV file.
         /// </summary>
         /// <returns>A string representation of the CSV file.</returns>
         public override string ToString() {
-            return ToString(CsvSeparator.SemiColon);
+            return ToString(Separator);
         }
 
         /// <summary>
@@ -137,31 +194,40 @@ namespace Skybrud.Csv {
 
         }
 
+        /// <summary>
+        /// Saves the CSV file to it's original path.
+        /// </summary>
+        /// <returns>The original instance of <see cref="CsvFile"/>.</returns>
         public CsvFile Save() {
             if (String.IsNullOrWhiteSpace(Path)) throw new Exception("Property not set: Path");
-            return Save(Path, Separator, Encoding.UTF8);
+            return Save(Path, Separator, Encoding);
         }
 
+        /// <summary>
+        /// Saves the CSV file to the specified <paramref name="path"/>.
+        /// </summary>
+        /// <param name="path">The path to where the CSV file should be saved.</param>
+        /// <returns>The original instance of <see cref="CsvFile"/>.</returns>
         public CsvFile Save(string path) {
-            return Save(path, Separator, Encoding.UTF8);
+            return Save(path, Separator, Encoding);
         }
 
         /// <summary>
         /// Saves the CSV file at the specified <paramref name="path"/>, using the specified
-        /// <paramref name="separator"/> and <see cref="Encoding.UTF8"/>..
+        /// <paramref name="separator"/> and <see cref="Encoding"/>.
         /// </summary>
-        /// <param name="path">The path of the file to write to.</param>
+        /// <param name="path">The path to where the CSV file should be saved.</param>
         /// <param name="separator">The separator to be used.</param>
         /// <returns>The original instance of <see cref="CsvFile"/>.</returns>
         public CsvFile Save(string path, CsvSeparator separator) {
-            return Save(path, separator, Encoding.UTF8);
+            return Save(path, separator, Encoding);
         }
 
         /// <summary>
         /// Saves the CSV file at the specified <paramref name="path"/>, using <see cref="Separator"/> and the
         /// specified <paramref name="encoding"/>.
         /// </summary>
-        /// <param name="path">The path of the file to write to.</param>
+        /// <param name="path">The path to where the CSV file should be saved.</param>
         /// <param name="encoding">The encoding to be used.</param>
         /// <returns>The original instance of <see cref="CsvFile"/>.</returns>
         public CsvFile Save(string path, Encoding encoding) {
@@ -172,7 +238,7 @@ namespace Skybrud.Csv {
         /// Saves the CSV file at the specified <paramref name="path"/>, using the specified
         /// <paramref name="separator"/> and <paramref name="encoding"/>.
         /// </summary>
-        /// <param name="path">The path of the file to write to.</param>
+        /// <param name="path">The path to where the CSV file should be saved.</param>
         /// <param name="separator">The separator to be used.</param>
         /// <param name="encoding">The encoding to be used.</param>
         /// <returns>The original instance of <see cref="CsvFile"/>.</returns>
@@ -185,18 +251,14 @@ namespace Skybrud.Csv {
 
         #region Static methods
 
-        public static CsvFile Create() {
-            return new CsvFile();
-        }
-
         /// <summary>
         /// Parses the specified <paramref name="text"/> into an instance of <see cref="CsvFile"/>, using
-        /// <see cref="CsvSeparator.SemiColon"/> as a separator.
+        /// <see cref="DefaultSeparator"/> as a separator.
         /// </summary>
         /// <param name="text">The text representing the contents of the CSV file.</param>
         /// <returns>An instance of <see cref="CsvFile"/>.</returns>
         public static CsvFile Parse(string text) {
-            return Parse(text, CsvSeparator.SemiColon);
+            return Parse(text, DefaultSeparator);
         }
 
         /// <summary>
@@ -217,40 +279,36 @@ namespace Skybrud.Csv {
         }
 
         /// <summary>
-        /// Loads the CSV file at the specified <paramref name="path"/>. <see cref="Encoding.UTF8"/> is assumed as
-        /// encoding. <see cref="CsvSeparator.SemiColon"/> is used as separator.
+        /// Loads the CSV file at the specified <paramref name="path"/>
         /// </summary>
         /// <param name="path">The path to the CSV file.</param>
         /// <returns>An instance of <see cref="CsvFile"/>.</returns>
         public static CsvFile Load(string path) {
-            return Load(path, CsvSeparator.SemiColon, Encoding.UTF8);
+            return Load(path, DefaultSeparator, DefaultEncoding);
         }
 
         /// <summary>
-        /// Loads the CSV file at the specified <paramref name="path"/>. <see cref="Encoding.UTF8"/> is assumed as
-        /// encoding. <paramref name="separator"/> is used as separator.
+        /// Loads the CSV file at the specified <paramref name="path"/>.
         /// </summary>
         /// <param name="path">The path to the CSV file.</param>
         /// <param name="separator">The separator used in the CSV file.</param>
         /// <returns>An instance of <see cref="CsvFile"/>.</returns>
         public static CsvFile Load(string path, CsvSeparator separator) {
-            return Load(path, separator, Encoding.UTF8);
+            return Load(path, separator, DefaultEncoding);
         }
 
         /// <summary>
-        /// Loads the CSV file at the specified <paramref name="path"/>. <paramref name="encoding"/> is assumed as
-        /// encoding. <see cref="CsvSeparator.SemiColon"/> is used as separator.
+        /// Loads the CSV file at the specified <paramref name="path"/>.
         /// </summary>
         /// <param name="path">The path to the CSV file.</param>
         /// <param name="encoding">The encoding of the CSV file.</param>
         /// <returns>An instance of <see cref="CsvFile"/>.</returns>
         public static CsvFile Load(string path, Encoding encoding) {
-            return Load(path, CsvSeparator.SemiColon, encoding);
+            return Load(path, DefaultSeparator, encoding);
         }
 
         /// <summary>
-        /// Loads the CSV file at the specified <paramref name="path"/>. <paramref name="separator"/> is used as
-        /// separator. <paramref name="encoding"/> is assumed as encoding. 
+        /// Loads the CSV file at the specified <paramref name="path"/>. 
         /// </summary>
         /// <param name="path">The path to the CSV file.</param>
         /// <param name="separator">The separator used in the CSV file.</param>
@@ -259,7 +317,7 @@ namespace Skybrud.Csv {
         public static CsvFile Load(string path, CsvSeparator separator, Encoding encoding) {
 
             // Load the contents of the CSV file
-            string contents = File.ReadAllText(path, encoding ?? Encoding.UTF8).Trim();
+            string contents = File.ReadAllText(path, encoding ?? DefaultEncoding).Trim();
 
             // Initialize a new CSV file
             CsvFile file = new CsvFile { Separator = separator, Path = path };
@@ -270,27 +328,47 @@ namespace Skybrud.Csv {
             return file;
 
         }
-
-
-
-
-
-
-
-
+        
+        /// <summary>
+        /// Loads a new CSV file from the specified <paramref name="stream"/>.
+        /// </summary>
+        /// <param name="stream">The stream.</param>
+        /// <returns>An instance of <see cref="CsvFile"/>.</returns>
         public static CsvFile Load(Stream stream) {
-            return Load(stream, CsvSeparator.SemiColon, Encoding.UTF8);
+            return Load(stream, DefaultSeparator, DefaultEncoding);
         }
 
+        /// <summary>
+        /// Loads a new CSV file from the specified <paramref name="stream"/>.
+        /// </summary>
+        /// <param name="stream">The stream.</param>
+        /// <param name="separator">The separator to </param>
+        /// <returns>An instance of <see cref="CsvFile"/>.</returns>
         public static CsvFile Load(Stream stream, CsvSeparator separator) {
-            return Load(stream, separator, Encoding.UTF8);
+            return Load(stream, separator, DefaultEncoding);
         }
 
+        /// <summary>
+        /// Loads a new CSV file from the specified <paramref name="stream"/>.
+        /// </summary>
+        /// <param name="stream">The stream.</param>
+        /// <param name="encoding">The encoding of the CSV file.</param>
+        /// <returns>An instance of <see cref="CsvFile"/>.</returns>
         public static CsvFile Load(Stream stream, Encoding encoding) {
-            return Load(stream, CsvSeparator.SemiColon, encoding);
+            return Load(stream, DefaultSeparator, encoding);
         }
 
+        /// <summary>
+        /// Loads a new CSV file from the specified <paramref name="stream"/>.
+        /// </summary>
+        /// <param name="stream">The stream.</param>
+        /// <param name="separator">The separator used in the CSV file.</param>
+        /// <param name="encoding">The encoding of the CSV file.</param>
+        /// <returns>An instance of <see cref="CsvFile"/>.</returns>
         public static CsvFile Load(Stream stream, CsvSeparator separator, Encoding encoding) {
+
+            // Make sure we have an encoding
+            encoding = encoding ?? DefaultEncoding;
 
             // Load the contents of the file/stream into a byte array
             byte[] bytes;
@@ -318,36 +396,15 @@ namespace Skybrud.Csv {
             return file;
 
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        
         /// <summary>
         /// Internal helper method for parsing the contents of a CSV file.
         /// </summary>
-        /// <param name="file"></param>
-        /// <param name="contents"></param>
-        /// <param name="separator"></param>
+        /// <param name="file">The CSV file.</param>
+        /// <param name="contents">The contents of the CSV file, as a string.</param>
+        /// <param name="separator">The separator used in the CSV file.</param>
         /// <returns><paramref name="file"/>.</returns>
-        private static CsvFile ParseInternal(CsvFile file, string contents, CsvSeparator separator = CsvSeparator.SemiColon) {
+        private static CsvFile ParseInternal(CsvFile file, string contents, CsvSeparator separator = DefaultSeparator) {
 
             // Normalize line endings
             contents = contents.Replace("\r\n", "\n");
@@ -367,7 +424,7 @@ namespace Skybrud.Csv {
             // Parse each line into a list of cell values
             List<List<string>> lines = ParseLines(contents, sep);
 
-            if (lines.Count == 0) throw new Exception("WTF?");
+            if (lines.Count == 0) throw new Exception("WTF?\r\r\nSeparator: " + separator + "\r\n" + contents);
 
             // If malformed, each line/row may not have the same amount of cells
             int maxColumns = lines.Max(x => x.Count);
