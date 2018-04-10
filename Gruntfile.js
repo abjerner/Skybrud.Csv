@@ -5,6 +5,9 @@ module.exports = function (grunt) {
 	// Load the package JSON file
 	var pkg = grunt.file.readJSON('package.json');
 
+	// Get the root path of the project
+	var projectRoot = 'src/' + pkg.name + '/';
+
 	// Load information about the assembly
     var assembly = grunt.file.readJSON('src/Skybrud.Csv/Properties/AssemblyInfo.json');
 
@@ -13,30 +16,50 @@ module.exports = function (grunt) {
 
 	grunt.initConfig({
 		pkg: pkg,
-		nugetpack: {
-			hest: {
-				src: 'src/Skybrud.Csv/Skybrud.Csv.csproj',
-				dest: 'releases/nuget/'
+		clean: {
+			files: [
+				'releases/temp/'
+			]
+		},
+		copy: {
+			bacon: {
+				files: [
+					{
+						expand: true,
+						cwd: projectRoot + '../',
+						src: [
+							'LICENSE.html'
+						],
+						dest: 'releases/temp/'
+					},
+					{
+						expand: true,
+						cwd: projectRoot + 'bin/Release/',
+						src: [
+							'**/*.dll',
+							'**/*.xml'
+						],
+						dest: 'releases/temp/'
+					}
+				]
 			}
 		},
 		zip: {
 			release: {
-				router: function (filepath) {
-					return path.basename(filepath);
-				},
+				cwd: 'releases/temp/',
 				src: [
-					'src/Skybrud.Social.Core/bin/Release/Skybrud.Csv.dll',
-					'src/Skybrud.Social.Core/bin/Release/Skybrud.Csv.xml'
+					'releases/temp/**/*.*'
 				],
-				dest: 'releases/github/Skybrud.Csv.v' + version + '.zip'
+				dest: 'releases/github/' + pkg.name + '.v' + version + '.zip'
 			}
 		}
 	});
 
-	grunt.loadNpmTasks('grunt-nuget');
+	grunt.loadNpmTasks('grunt-contrib-clean');
+	grunt.loadNpmTasks('grunt-contrib-copy');
 	grunt.loadNpmTasks('grunt-zip');
 
-	grunt.registerTask('release', ['nugetpack', 'zip']);
+	grunt.registerTask('release', ['clean', 'copy', 'zip', 'clean']);
 
 	grunt.registerTask('default', ['release']);
 

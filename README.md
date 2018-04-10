@@ -1,4 +1,4 @@
-Skybrud.CSV
+Skybrud.Csv
 ============
 
 ### Installation
