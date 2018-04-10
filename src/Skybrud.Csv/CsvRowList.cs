@@ -16,7 +16,7 @@ namespace Skybrud.Csv {
         /// <summary>
         /// Gets a reference back to the parent <see cref="CsvFile"/>.
         /// </summary>
-        public CsvFile File { get; private set; }
+        public CsvFile File { get; }
 
         /// <summary>
         /// Gets the number of columns contained in the list.

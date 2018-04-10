@@ -10,12 +10,12 @@
         /// <summary>
         /// Gets a reference back to the parent <see cref="CsvFile"/>.
         /// </summary>
-        public CsvFile File { get; set; }
+        public CsvFile File { get; internal set; }
 
         /// <summary>
         /// Gets the index of the column.
         /// </summary>
-        public int Index { get; set; }
+        public int Index { get; internal set; }
 
         /// <summary>
         /// Gets the name of the column.

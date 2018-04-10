@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Linq;
 
 namespace Skybrud.Csv {
@@ -13,19 +14,19 @@ namespace Skybrud.Csv {
         /// <summary>
         /// Gets a reference back to the parent <see cref="CsvFile"/>.
         /// </summary>
-        public CsvFile File { get; private set; }
+        public CsvFile File { get; }
 
         /// <summary>
         /// Gets the index of the row.
         /// </summary>
-        public int Index { get; private set; }
+        public int Index { get; }
 
         /// <summary>
-        /// Gets the value of the first cell matching the specified <paramref name="columnName"/>, or <code>null</code>
+        /// Gets the value of the first cell matching the specified <paramref name="columnName"/>, or <c>null</c>
         /// if not found.
         /// </summary>
         /// <param name="columnName">The name of the column.</param>
-        /// <returns>An instance of <see cref="CsvCell"/>, or <code>null</code> if not found.</returns>
+        /// <returns>An instance of <see cref="CsvCell"/>, or <c>null</c> if not found.</returns>
         public CsvCell this[string columnName] {
             get { return Cells.FirstOrDefault(x => x.Column.Name == columnName); }
         }
@@ -33,7 +34,7 @@ namespace Skybrud.Csv {
         /// <summary>
         /// Gets a reference to the cells of the row.
         /// </summary>
-        public CsvCellList Cells { get; private set; }
+        public CsvCellList Cells { get; }
 
         #endregion
 
@@ -70,7 +71,7 @@ namespace Skybrud.Csv {
         /// <returns>The string value of the cell.</returns>
         public string GetCellValue(int index) {
             CsvCell cell = Cells[index];
-            return cell == null ? null : cell.Value;
+            return cell?.Value;
         }
 
         /// <summary>
@@ -105,7 +106,7 @@ namespace Skybrud.Csv {
         /// <returns>The string value of the cell.</returns>
         public string GetCellValue(string columnName) {
             CsvCell cell = this[columnName];
-            return cell == null ? null : cell.Value;
+            return cell?.Value;
         }
 
         /// <summary>

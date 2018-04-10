@@ -16,7 +16,7 @@ namespace Skybrud.Csv {
         /// <summary>
         /// Gets a reference back to the parent <see cref="CsvRow"/>.
         /// </summary>
-        public CsvRow Row { get; set; }
+        public CsvRow Row { get; }
 
         /// <summary>
         /// Gets the number of cells contained in the row.
