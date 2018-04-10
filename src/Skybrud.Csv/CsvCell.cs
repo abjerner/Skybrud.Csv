@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 
 namespace Skybrud.Csv {
 
@@ -78,6 +79,57 @@ namespace Skybrud.Csv {
         /// <returns>An instance of <see cref="double"/>.</returns>
         public double AsDouble() {
             return Double.Parse(Value.Trim());
+        }
+        
+        /// <summary>
+        /// Saves the CSV file to it's original path.
+        /// </summary>
+        /// <returns>The original instance of <see cref="CsvFile"/>.</returns>
+        public CsvFile Save() {
+            return File.Save();
+        }
+
+        /// <summary>
+        /// Saves the CSV file to the specified <paramref name="path"/>.
+        /// </summary>
+        /// <param name="path">The path to where the CSV file should be saved.</param>
+        /// <returns>The original instance of <see cref="CsvFile"/>.</returns>
+        public CsvFile Save(string path) {
+            return File.Save(path);
+        }
+
+        /// <summary>
+        /// Saves the CSV file at the specified <paramref name="path"/>, using the specified
+        /// <paramref name="separator"/> and <see cref="CsvFile.Encoding"/>.
+        /// </summary>
+        /// <param name="path">The path to where the CSV file should be saved.</param>
+        /// <param name="separator">The separator to be used.</param>
+        /// <returns>The original instance of <see cref="CsvFile"/>.</returns>
+        public CsvFile Save(string path, CsvSeparator separator) {
+            return File.Save(path, separator);
+        }
+
+        /// <summary>
+        /// Saves the CSV file at the specified <paramref name="path"/>, using <see cref="CsvFile.Separator"/> and the
+        /// specified <paramref name="encoding"/>.
+        /// </summary>
+        /// <param name="path">The path to where the CSV file should be saved.</param>
+        /// <param name="encoding">The encoding to be used.</param>
+        /// <returns>The original instance of <see cref="CsvFile"/>.</returns>
+        public CsvFile Save(string path, Encoding encoding) {
+            return File.Save(path, encoding);
+        }
+
+        /// <summary>
+        /// Saves the CSV file at the specified <paramref name="path"/>, using the specified
+        /// <paramref name="separator"/> and <paramref name="encoding"/>.
+        /// </summary>
+        /// <param name="path">The path to where the CSV file should be saved.</param>
+        /// <param name="separator">The separator to be used.</param>
+        /// <param name="encoding">The encoding to be used.</param>
+        /// <returns>The original instance of <see cref="CsvFile"/>.</returns>
+        public CsvFile Save(string path, CsvSeparator separator, Encoding encoding) {
+            return File.Save(path, separator, encoding);
         }
 
         #endregion
