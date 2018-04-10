@@ -1,6 +1,8 @@
 Skybrud.Csv
 ============
 
+**Skybrud.Csv** is a small library for parsing and generating CSV files. It's written in .NET, and supports both .NET Standard 1.3 and .NET Framework 4.5 (and newer).
+
 ### Installation
 
 To install the package, pick one of the two methods below:
@@ -9,7 +11,7 @@ To install the package, pick one of the two methods below:
    Install this NuGet package in your Visual Studio project. Makes updating easy.
 
 2. [**ZIP file**][GitHubRelease]  
-   Grab a ZIP file of the latest release; unzip and move `Skybrud.Csv.dll` to the bin directory of your project.
+   Grab a ZIP file of the latest release; unzip and move the `Skybrud.Csv.dll` for your target framework to the bin directory of your project.
    
 ### Usage
 
@@ -51,7 +53,7 @@ foreach (CsvRow row in csv2.Rows)
     Console.WriteLine("Row #" + (row.Index + 1));
     
     // Iterate throug the cells of the row
-    foreach (var cell in row.Cells)
+    foreach (CsvCell cell in row.Cells)
     {
         Console.WriteLine(cell.Column.Name + " => " + cell.Value);
     }
