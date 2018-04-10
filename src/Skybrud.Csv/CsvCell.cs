@@ -27,7 +27,7 @@ namespace Skybrud.Csv {
         /// <summary>
         /// Gets the string value of the cell.
         /// </summary>
-        public string Value { get; internal set; }
+        public string Value { get; set; }
 
         #endregion
 
