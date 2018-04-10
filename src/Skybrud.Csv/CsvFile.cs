@@ -424,7 +424,7 @@ namespace Skybrud.Csv {
             // Parse each line into a list of cell values
             List<List<string>> lines = ParseLines(contents, sep);
 
-            if (lines.Count == 0) throw new Exception("WTF?\r\r\nSeparator: " + separator + "\r\n" + contents);
+            if (lines.Count == 0) throw new CsvException("Invalid CSV file");
 
             // If malformed, each line/row may not have the same amount of cells
             int maxColumns = lines.Max(x => x.Count);
