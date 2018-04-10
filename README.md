@@ -3,7 +3,7 @@ Skybrud.Csv
 
 ### Installation
 
-To install the core library of Skybrud.Social, simply pick one of the three methods below:
+To install the core library of Skybrud.Csv, pick one of the two methods below:
 
 1. [**NuGet Package**][NuGetPackage]  
    Install this NuGet package in your Visual Studio project. Makes updating easy.
