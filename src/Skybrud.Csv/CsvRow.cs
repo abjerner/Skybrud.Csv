@@ -134,6 +134,30 @@ namespace Skybrud.Csv {
             return cell == null ? default(T) : callback(cell.Value);
         }
 
+        /// <summary>
+        /// Sets the value of the cell at the specified <paramref name="index"/>.
+        /// </summary>
+        /// <param name="index">The index of the cell.</param>
+        /// <param name="value">The new value of the cell.</param>
+        /// <returns>The original instance of <see cref="CsvRow"/>.</returns>
+        public CsvRow SetCellValue(int index, object value) {
+            CsvCell cell = Cells[index];
+            cell.Value = String.Format(CultureInfo.InvariantCulture, "{0}", value);
+            return this;
+        }
+
+        /// <summary>
+        /// Set the value of the cell with the specified <paramref name="columnName"/>.
+        /// </summary>
+        /// <param name="columnName">The name of the column.</param>
+        /// <param name="value">The new value of the cell.</param>
+        /// <returns>The original instance of <see cref="CsvRow"/>.</returns>
+        public CsvRow SetCellValue(string columnName, object value) {
+            CsvCell cell = this[columnName];
+            cell.Value = String.Format(CultureInfo.InvariantCulture, "{0}", value);
+            return this;
+        }
+
         #endregion
 
     }
