@@ -9,7 +9,7 @@ namespace Skybrud.Csv {
     /// <summary>
     /// Class representing a CSV file parsed either from a file or a string.
     /// </summary>
-    public class CsvFile {
+    public partial class CsvFile {
 
         #region Constants
 
@@ -45,7 +45,7 @@ namespace Skybrud.Csv {
         /// <summary>
         /// Gets whether this instance has a reference to the path the CSV file was loaded from.
         /// </summary>
-        public bool HasPath => !String.IsNullOrWhiteSpace(Path);
+        public bool HasPath => !string.IsNullOrWhiteSpace(Path);
 
         /// <summary>
         /// Gets a list of the columns of the file.
@@ -142,7 +142,7 @@ namespace Skybrud.Csv {
         public string ToString(CsvSeparator separator) {
 
             StringBuilder sb = new StringBuilder();
-            
+
             // Get the separator as a "char"
             char sep;
             switch (separator) {
@@ -168,7 +168,7 @@ namespace Skybrud.Csv {
                     sb.Append(Escape(cell == null ? "" : cell.Value, sep));
                 }
             }
-            
+
             return sb.ToString();
 
         }
@@ -184,7 +184,7 @@ namespace Skybrud.Csv {
         private string Escape(string value, char separator) {
 
             if (value.Contains('"') || value.Contains('\n') || value.Contains(separator)) {
-                
+
                 // Double quotes are escaped by adding a new double quote for each existing double quote
                 return "\"" + value.Replace("\"", "\"\"") + "\"";
 
@@ -199,7 +199,7 @@ namespace Skybrud.Csv {
         /// </summary>
         /// <returns>The original instance of <see cref="CsvFile"/>.</returns>
         public CsvFile Save() {
-            if (String.IsNullOrWhiteSpace(Path)) throw new Exception("Property not set: Path");
+            if (string.IsNullOrWhiteSpace(Path)) throw new Exception("Property not set: Path");
             return Save(Path, Separator, Encoding);
         }
 
@@ -308,7 +308,7 @@ namespace Skybrud.Csv {
         }
 
         /// <summary>
-        /// Loads the CSV file at the specified <paramref name="path"/>. 
+        /// Loads the CSV file at the specified <paramref name="path"/>.
         /// </summary>
         /// <param name="path">The path to the CSV file.</param>
         /// <param name="separator">The separator used in the CSV file.</param>
@@ -328,7 +328,7 @@ namespace Skybrud.Csv {
             return file;
 
         }
-        
+
         /// <summary>
         /// Loads a new CSV file from the specified <paramref name="stream"/>.
         /// </summary>
@@ -396,7 +396,7 @@ namespace Skybrud.Csv {
             return file;
 
         }
-        
+
         /// <summary>
         /// Internal helper method for parsing the contents of a CSV file.
         /// </summary>
@@ -450,7 +450,7 @@ namespace Skybrud.Csv {
         }
 
         /// <summary>
-        /// Internal helper method for parsing each line of the 
+        /// Internal helper method for parsing each line of the
         /// </summary>
         /// <param name="contents">The contents of the CSV file.</param>
         /// <param name="separator">The separator used in the CSV file.</param>
@@ -459,7 +459,7 @@ namespace Skybrud.Csv {
 
             List<List<string>> lines = new List<List<string>>();
 
-            string buffer = String.Empty;
+            string buffer = string.Empty;
             bool enclosed = false;
             bool escaped = false;
 
@@ -501,11 +501,11 @@ namespace Skybrud.Csv {
                     buffer += chr;
                 } else if (chr == separator) {
                     line.Add(buffer);
-                    buffer = String.Empty;
+                    buffer = string.Empty;
                 } else if (chr == '\n') {
                     line.Add(buffer);
                     lines.Add(line);
-                    buffer = String.Empty;
+                    buffer = string.Empty;
                     line = new List<string>();
                 } else {
                     buffer += chr;
@@ -523,7 +523,7 @@ namespace Skybrud.Csv {
             return lines;
 
         }
-        
+
         #endregion
 
     }

@@ -9,12 +9,12 @@
         /// Indicates that the separator is a comma.
         /// </summary>
         Comma,
-        
+
         /// <summary>
         /// Indicates that the separator is a semi colon.
         /// </summary>
         SemiColon,
-        
+
         /// <summary>
         /// Indicates that the separator is a colon.
         /// </summary>
@@ -24,7 +24,7 @@
         /// Indicates that the separator is a space.
         /// </summary>
         Space,
-        
+
         /// <summary>
         /// Indicates that the separator is a tab.
         /// </summary>

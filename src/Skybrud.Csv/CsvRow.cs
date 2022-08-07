@@ -64,7 +64,7 @@ namespace Skybrud.Csv {
             CsvColumn column = File.Columns[Cells.Length];
             return Cells.AddCell(column, value);
         }
-    
+
         /// <summary>
         /// Gets the string value of the cell at the specified <paramref name="index"/>.
         /// </summary>
@@ -143,7 +143,7 @@ namespace Skybrud.Csv {
         /// <returns>The original instance of <see cref="CsvRow"/>.</returns>
         public CsvRow SetCellValue(int index, object value) {
             CsvCell cell = Cells[index];
-            cell.Value = String.Format(CultureInfo.InvariantCulture, "{0}", value);
+            cell.Value = string.Format(CultureInfo.InvariantCulture, "{0}", value);
             return this;
         }
 
@@ -155,10 +155,10 @@ namespace Skybrud.Csv {
         /// <returns>The original instance of <see cref="CsvRow"/>.</returns>
         public CsvRow SetCellValue(string columnName, object value) {
             CsvCell cell = this[columnName];
-            cell.Value = String.Format(CultureInfo.InvariantCulture, "{0}", value);
+            cell.Value = string.Format(CultureInfo.InvariantCulture, "{0}", value);
             return this;
         }
-        
+
         /// <summary>
         /// Saves the CSV file to it's original path.
         /// </summary>

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Text;
+﻿using System.Text;
 
 namespace Skybrud.Csv {
 
@@ -62,7 +61,7 @@ namespace Skybrud.Csv {
         /// </summary>
         /// <returns>An instance of <see cref="int"/>.</returns>
         public int AsInt32() {
-            return Int32.Parse(Value.Trim());
+            return int.Parse(Value.Trim());
         }
 
         /// <summary>
@@ -70,7 +69,7 @@ namespace Skybrud.Csv {
         /// </summary>
         /// <returns>An instance of <see cref="long"/>.</returns>
         public long AsInt64() {
-            return Int64.Parse(Value.Trim());
+            return long.Parse(Value.Trim());
         }
 
         /// <summary>
@@ -78,9 +77,9 @@ namespace Skybrud.Csv {
         /// </summary>
         /// <returns>An instance of <see cref="double"/>.</returns>
         public double AsDouble() {
-            return Double.Parse(Value.Trim());
+            return double.Parse(Value.Trim());
         }
-        
+
         /// <summary>
         /// Saves the CSV file to it's original path.
         /// </summary>
