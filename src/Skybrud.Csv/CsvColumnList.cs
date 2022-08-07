@@ -9,7 +9,7 @@ namespace Skybrud.Csv {
     /// </summary>
     public class CsvColumnList : IEnumerable<CsvColumn> {
 
-        private readonly List<CsvColumn> _columns = new List<CsvColumn>();
+        private readonly List<CsvColumn> _columns = new();
 
         #region Properties
 
@@ -55,7 +55,7 @@ namespace Skybrud.Csv {
         /// <param name="name">The name of the column.</param>
         /// <returns>The added column.</returns>
         public CsvColumn AddColumn(string name) {
-            CsvColumn column = new CsvColumn { Index = _columns.Count, File = File, Name = name ?? "" };
+            CsvColumn column = new() { Index = _columns.Count, File = File, Name = name ?? "" };
             _columns.Add(column);
             return column;
         }

@@ -9,7 +9,7 @@ namespace Skybrud.Csv {
     /// </summary>
     public class CsvCellList : IEnumerable<CsvCell> {
 
-        private readonly List<CsvCell> _cells = new List<CsvCell>();
+        private readonly List<CsvCell> _cells = new();
 
         #region Properties
 
@@ -39,7 +39,7 @@ namespace Skybrud.Csv {
                     return new CsvCell {
                         Column = Row.File.Columns[index],
                         Row = Row,
-                        Value = ""
+                        Value = string.Empty
                     };
                 }
                 return _cells[index];
@@ -69,7 +69,7 @@ namespace Skybrud.Csv {
         /// <param name="value">The value of the cell.</param>
         /// <returns>The added cell.</returns>
         public CsvCell AddCell(CsvColumn column, string value) {
-            CsvCell cell = new CsvCell { Column = column, Row = Row, Value = value ?? "" };
+            CsvCell cell = new() { Column = column, Row = Row, Value = value ?? string.Empty };
             _cells.Add(cell);
             return cell;
         }

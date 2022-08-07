@@ -9,7 +9,7 @@ namespace Skybrud.Csv {
     /// </summary>
     public class CsvRowList : IEnumerable<CsvRow> {
 
-        private readonly List<CsvRow> _rows = new List<CsvRow>();
+        private readonly List<CsvRow> _rows = new();
 
         #region Properties
 
@@ -56,7 +56,7 @@ namespace Skybrud.Csv {
         /// </summary>
         /// <returns>The added row.</returns>
         public CsvRow AddRow() {
-            CsvRow row = new CsvRow(_rows.Count, File);
+            CsvRow row = new(_rows.Count, File);
             _rows.Add(row);
             return row;
         }

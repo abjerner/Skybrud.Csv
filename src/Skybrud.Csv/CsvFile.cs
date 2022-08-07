@@ -141,18 +141,17 @@ namespace Skybrud.Csv {
         /// <returns>A string representation of the CSV file.</returns>
         public string ToString(CsvSeparator separator) {
 
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
 
             // Get the separator as a "char"
-            char sep;
-            switch (separator) {
-                case CsvSeparator.Comma: sep = ','; break;
-                case CsvSeparator.Colon: sep = ':'; break;
-                case CsvSeparator.SemiColon: sep = ';'; break;
-                case CsvSeparator.Space: sep = ' '; break;
-                case CsvSeparator.Tab: sep = '\t'; break;
-                default: sep = ';'; break;
-            }
+            char sep = separator switch {
+                CsvSeparator.Comma => ',',
+                CsvSeparator.Colon => ':',
+                CsvSeparator.SemiColon => ';',
+                CsvSeparator.Space => ' ',
+                CsvSeparator.Tab => '\t',
+                _ => ';'
+            };
 
             // Append the first line with the column headers
             for (int i = 0; i < Columns.Length; i++) {
@@ -165,7 +164,7 @@ namespace Skybrud.Csv {
                 for (int i = 0; i < Columns.Length; i++) {
                     if (i > 0) sb.Append(sep);
                     CsvCell cell = i < row.Cells.Length ? row.Cells[i] : null;
-                    sb.Append(Escape(cell == null ? "" : cell.Value, sep));
+                    sb.Append(Escape(cell == null ? string.Empty : cell.Value, sep));
                 }
             }
 
@@ -271,7 +270,7 @@ namespace Skybrud.Csv {
         public static CsvFile Parse(string text, CsvSeparator separator) {
 
             // Initialize a new CSV file
-            CsvFile file = new CsvFile();
+            CsvFile file = new();
 
             // Parse the contents
             return ParseInternal(file, text, separator);
@@ -320,7 +319,7 @@ namespace Skybrud.Csv {
             string contents = File.ReadAllText(path, encoding ?? DefaultEncoding).Trim();
 
             // Initialize a new CSV file
-            CsvFile file = new CsvFile { Separator = separator, Path = path };
+            CsvFile file = new() { Separator = separator, Path = path };
 
             // Parse the contents
             ParseInternal(file, contents, separator);
@@ -368,11 +367,11 @@ namespace Skybrud.Csv {
         public static CsvFile Load(Stream stream, CsvSeparator separator, Encoding encoding) {
 
             // Make sure we have an encoding
-            encoding = encoding ?? DefaultEncoding;
+            encoding ??= DefaultEncoding;
 
             // Load the contents of the file/stream into a byte array
             byte[] bytes;
-            using (BinaryReader reader = new BinaryReader(stream)) {
+            using (BinaryReader reader = new(stream)) {
                 const int bufferSize = 4096;
                 using (var ms = new MemoryStream()) {
                     byte[] buffer = new byte[bufferSize];
@@ -388,7 +387,7 @@ namespace Skybrud.Csv {
             string contents = encoding.GetString(bytes);
 
             // Initialize a new CSV file
-            CsvFile file = new CsvFile { Separator = separator };
+            CsvFile file = new() { Separator = separator };
 
             // Parse the contents
             ParseInternal(file, contents, separator);
@@ -457,13 +456,13 @@ namespace Skybrud.Csv {
         /// <returns>A list of <see cref="List{String}"/>.</returns>
         private static List<List<string>> ParseLines(string contents, char separator) {
 
-            List<List<string>> lines = new List<List<string>>();
+            List<List<string>> lines = new();
 
             string buffer = string.Empty;
             bool enclosed = false;
             bool escaped = false;
 
-            List<string> line = new List<string>();
+            List<string> line = new();
 
             // Parse each character in the input string
             for (int i = 0; i < contents.Length; i++) {
