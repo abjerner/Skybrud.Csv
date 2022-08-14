@@ -8,7 +8,7 @@ namespace UnitTestProject1 {
 
         [TestMethod]
         public void TestMethod1() {
-            
+
             CsvFile csv1 = new CsvFile()
                     .AddColumn("Id")
                     .AddColumn("Name")

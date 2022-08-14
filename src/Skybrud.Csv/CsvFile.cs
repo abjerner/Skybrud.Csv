@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
+using static Skybrud.Csv.CsvConstants;
+
 namespace Skybrud.Csv {
 
     /// <summary>
@@ -141,17 +143,13 @@ namespace Skybrud.Csv {
         /// <returns>A string representation of the CSV file.</returns>
         public string ToString(CsvSeparator separator) {
 
+            // Fallback to the default separator if set to "Auto"
+            if (separator == CsvSeparator.Auto) separator = DefaultSeparator;
+
             StringBuilder sb = new();
 
             // Get the separator as a "char"
-            char sep = separator switch {
-                CsvSeparator.Comma => ',',
-                CsvSeparator.Colon => ':',
-                CsvSeparator.SemiColon => ';',
-                CsvSeparator.Space => ' ',
-                CsvSeparator.Tab => '\t',
-                _ => ';'
-            };
+            char sep = GetCharFromSeparator(separator);
 
             // Append the first line with the column headers
             for (int i = 0; i < Columns.Length; i++) {
@@ -182,7 +180,7 @@ namespace Skybrud.Csv {
         /// <returns>The escaped string.</returns>
         private string Escape(string value, char separator) {
 
-            if (value.Contains('"') || value.Contains('\n') || value.Contains(separator)) {
+            if (value.Contains(DoubleQuote) || value.Contains(NewLine) || value.Contains(separator)) {
 
                 // Double quotes are escaped by adding a new double quote for each existing double quote
                 return "\"" + value.Replace("\"", "\"\"") + "\"";
@@ -257,7 +255,7 @@ namespace Skybrud.Csv {
         /// <param name="text">The text representing the contents of the CSV file.</param>
         /// <returns>An instance of <see cref="CsvFile"/>.</returns>
         public static CsvFile Parse(string text) {
-            return Parse(text, DefaultSeparator);
+            return Parse(text, CsvSeparator.Auto);
         }
 
         /// <summary>
@@ -270,10 +268,10 @@ namespace Skybrud.Csv {
         public static CsvFile Parse(string text, CsvSeparator separator) {
 
             // Initialize a new CSV file
-            CsvFile file = new();
+            CsvFile file = new(separator);
 
             // Parse the contents
-            return ParseInternal(file, text, separator);
+            return ParseInternal(file, text);
 
         }
 
@@ -283,7 +281,7 @@ namespace Skybrud.Csv {
         /// <param name="path">The path to the CSV file.</param>
         /// <returns>An instance of <see cref="CsvFile"/>.</returns>
         public static CsvFile Load(string path) {
-            return Load(path, DefaultSeparator, DefaultEncoding);
+            return Load(path, CsvSeparator.Auto, null);
         }
 
         /// <summary>
@@ -293,7 +291,7 @@ namespace Skybrud.Csv {
         /// <param name="separator">The separator used in the CSV file.</param>
         /// <returns>An instance of <see cref="CsvFile"/>.</returns>
         public static CsvFile Load(string path, CsvSeparator separator) {
-            return Load(path, separator, DefaultEncoding);
+            return Load(path, separator, null);
         }
 
         /// <summary>
@@ -303,7 +301,7 @@ namespace Skybrud.Csv {
         /// <param name="encoding">The encoding of the CSV file.</param>
         /// <returns>An instance of <see cref="CsvFile"/>.</returns>
         public static CsvFile Load(string path, Encoding encoding) {
-            return Load(path, DefaultSeparator, encoding);
+            return Load(path, CsvSeparator.Auto, encoding);
         }
 
         /// <summary>
@@ -316,14 +314,15 @@ namespace Skybrud.Csv {
         public static CsvFile Load(string path, CsvSeparator separator, Encoding encoding) {
 
             // Load the contents of the CSV file
-            string contents = File.ReadAllText(path, encoding ?? DefaultEncoding).Trim();
+            byte[] bytes = File.ReadAllBytes(path);
 
-            // Initialize a new CSV file
-            CsvFile file = new() { Separator = separator, Path = path };
+            // Parse the CSV file from the bytes
+            CsvFile file = Parse(bytes, separator, encoding);
 
-            // Parse the contents
-            ParseInternal(file, contents, separator);
+            // Update the "Path" property so we'll have it for later
+            file.Path = path;
 
+            // Return the file
             return file;
 
         }
@@ -334,7 +333,7 @@ namespace Skybrud.Csv {
         /// <param name="stream">The stream.</param>
         /// <returns>An instance of <see cref="CsvFile"/>.</returns>
         public static CsvFile Load(Stream stream) {
-            return Load(stream, DefaultSeparator, DefaultEncoding);
+            return Load(stream, DefaultSeparator, null);
         }
 
         /// <summary>
@@ -344,7 +343,7 @@ namespace Skybrud.Csv {
         /// <param name="separator">The separator to </param>
         /// <returns>An instance of <see cref="CsvFile"/>.</returns>
         public static CsvFile Load(Stream stream, CsvSeparator separator) {
-            return Load(stream, separator, DefaultEncoding);
+            return Load(stream, separator, null);
         }
 
         /// <summary>
@@ -366,9 +365,6 @@ namespace Skybrud.Csv {
         /// <returns>An instance of <see cref="CsvFile"/>.</returns>
         public static CsvFile Load(Stream stream, CsvSeparator separator, Encoding encoding) {
 
-            // Make sure we have an encoding
-            encoding ??= DefaultEncoding;
-
             // Load the contents of the file/stream into a byte array
             byte[] bytes;
             using (BinaryReader reader = new(stream)) {
@@ -383,14 +379,26 @@ namespace Skybrud.Csv {
                 }
             }
 
-            // Convert the byte array to a string (using the specified encoding)
-            string contents = encoding.GetString(bytes);
+            return Parse(bytes, separator, encoding);
+
+        }
+
+        private static CsvFile Parse(byte[] bytes, CsvSeparator separator, Encoding encoding) {
+
+            string contents = null;
+
+            // Try to detect the encoding if none isn't specified
+            // TODO: Should we follow the BOM even if another encoding is explicitly specified?
+            encoding ??= GetEncodingByBom(bytes) ?? GetEncodingBySeek(bytes, out contents) ?? DefaultEncoding;
+
+            // Convert the byte array to a string (using the "encoding")
+            contents ??= encoding.GetString(bytes).Trim(WhiteSpaceCharacters);
 
             // Initialize a new CSV file
-            CsvFile file = new() { Separator = separator };
+            CsvFile file = new(separator, encoding);
 
             // Parse the contents
-            ParseInternal(file, contents, separator);
+            ParseInternal(file, contents);
 
             return file;
 
@@ -401,27 +409,29 @@ namespace Skybrud.Csv {
         /// </summary>
         /// <param name="file">The CSV file.</param>
         /// <param name="contents">The contents of the CSV file, as a string.</param>
-        /// <param name="separator">The separator used in the CSV file.</param>
         /// <returns><paramref name="file"/>.</returns>
-        private static CsvFile ParseInternal(CsvFile file, string contents, CsvSeparator separator = DefaultSeparator) {
+        private static CsvFile ParseInternal(CsvFile file, string contents) {
 
             // Normalize line endings
             contents = contents.Replace("\r\n", "\n");
             contents = contents.Replace("\r", "\n");
 
-            // Get the separator as a "char"
-            char sep;
-            switch (separator) {
-                case CsvSeparator.Comma: sep = ','; break;
-                case CsvSeparator.Colon: sep = ':'; break;
-                case CsvSeparator.SemiColon: sep = ';'; break;
-                case CsvSeparator.Space: sep = ' '; break;
-                case CsvSeparator.Tab: sep = '\t'; break;
-                default: sep = ';'; break;
+            if (file.Separator == CsvSeparator.Auto) {
+
+                // TODO: Ideally we should only check the first X bytes of the file
+
+                char separator = Separators
+                    .ToDictionary(x => x, x => contents.IndexOf(x))
+                    .Where(x => x.Value >= 0)
+                    .OrderBy(x => x.Value)
+                    .FirstOrDefault().Key;
+
+                file.Separator = IsSeparator(separator, out CsvSeparator e) ? e : DefaultSeparator;
+
             }
 
             // Parse each line into a list of cell values
-            List<List<string>> lines = ParseLines(contents, sep);
+            List<List<string>> lines = ParseLines(file, contents);
 
             if (lines.Count == 0) throw new CsvException("Invalid CSV file");
 
@@ -430,7 +440,7 @@ namespace Skybrud.Csv {
 
             // Parse the columns (column headers)
             for (int c = 0; c < maxColumns; c++) {
-                string name = lines[0].Skip(c).FirstOrDefault() ?? "";
+                string name = lines[0].Skip(c).FirstOrDefault() ?? string.Empty;
                 file.AddColumn(name);
             }
 
@@ -439,7 +449,7 @@ namespace Skybrud.Csv {
                 CsvRow row = file.AddRow();
                 for (int c = 0; c < maxColumns; c++) {
                     CsvColumn column = file.Columns[c];
-                    string value = lines[r].Skip(c).FirstOrDefault() ?? "";
+                    string value = lines[r].Skip(c).FirstOrDefault() ?? string.Empty;
                     row.AddCell(column, value);
                 }
             }
@@ -451,10 +461,10 @@ namespace Skybrud.Csv {
         /// <summary>
         /// Internal helper method for parsing each line of the
         /// </summary>
+        /// <param name="file">The CSV file we're parsing.</param>
         /// <param name="contents">The contents of the CSV file.</param>
-        /// <param name="separator">The separator used in the CSV file.</param>
         /// <returns>A list of <see cref="List{String}"/>.</returns>
-        private static List<List<string>> ParseLines(string contents, char separator) {
+        private static List<List<string>> ParseLines(CsvFile file, string contents) {
 
             List<List<string>> lines = new();
 
@@ -462,23 +472,40 @@ namespace Skybrud.Csv {
             bool enclosed = false;
             bool escaped = false;
 
+            // Get the separator as a "char"
+            char separator = GetCharFromSeparator(file.Separator);
+
             List<string> line = new();
 
+            int offset = 0;
+
+            // Does the first line specify the seprartor?
+            if (contents.Length > 4 && contents[0] == 's' && contents[1] == 'e' && contents[2] == 'p' && contents[3] == '=') {
+                if (IsSeparator(contents[4])) {
+                    separator = contents[4];
+                    file.Separator = GetSeparatorFromChar(separator);
+                    offset = 5;
+                }
+            }
+
+            // Increment the offset if the next character is \n
+            if (contents.Length > 5 && contents[5] is NewLine) offset++;
+
             // Parse each character in the input string
-            for (int i = 0; i < contents.Length; i++) {
+            for (int i = offset; i < contents.Length; i++) {
 
                 char chr = contents[i];
 
-                if (chr == '"') {
+                if (chr == DoubleQuote) {
 
                     // If the value is already enclosed, we handle further scenarios
                     if (enclosed) {
 
                         // Get the next character
-                        char next = i < contents.Length - 1 ? contents[i + 1] : ' ';
+                        char next = i < contents.Length - 1 ? contents[i + 1] : Space;
 
                         // A double quote may be used to escape another double quote if already in an enclosed value
-                        if (next == '"') {
+                        if (next == DoubleQuote) {
                             if (escaped) {
                                 buffer += chr;
                                 escaped = false;
@@ -501,7 +528,7 @@ namespace Skybrud.Csv {
                 } else if (chr == separator) {
                     line.Add(buffer);
                     buffer = string.Empty;
-                } else if (chr == '\n') {
+                } else if (chr == NewLine) {
                     line.Add(buffer);
                     lines.Add(line);
                     buffer = string.Empty;
@@ -522,6 +549,151 @@ namespace Skybrud.Csv {
             return lines;
 
         }
+
+        private static char GetCharFromSeparator(CsvSeparator separator) {
+            return separator switch {
+                CsvSeparator.Comma => Comma,
+                CsvSeparator.Colon => Colon,
+                CsvSeparator.SemiColon => SemiColon,
+                CsvSeparator.Space => Space,
+                CsvSeparator.Tab => Tab,
+                _ => SemiColon
+            };
+        }
+
+        private static CsvSeparator GetSeparatorFromChar(char character) {
+            return character switch {
+                Colon => CsvSeparator.Colon,
+                Comma => CsvSeparator.Comma,
+                SemiColon => CsvSeparator.SemiColon,
+                Space => CsvSeparator.Space,
+                Tab => CsvSeparator.Tab,
+                _ => throw new CsvException($"Unknown separator: {character}")
+            };
+        }
+
+        private static bool IsSeparator(char character) {
+            return character is Colon or Comma or SemiColon or Space or Tab;
+        }
+
+        private static bool IsSeparator(char character, out CsvSeparator separator) {
+
+            switch (character) {
+
+                case Colon:
+                    separator = CsvSeparator.Colon;
+                    return true;
+
+                case Comma:
+                    separator = CsvSeparator.Comma;
+                    return true;
+
+                case SemiColon:
+                    separator = CsvSeparator.SemiColon;
+                    return true;
+
+                case Space:
+                    separator = CsvSeparator.Space;
+                    return true;
+
+                case Tab:
+                    separator = CsvSeparator.Tab;
+                    return true;
+
+                default:
+                    separator = default;
+                    return false;
+
+            }
+
+        }
+
+        /// <summary>
+        /// Attempts to the find encoding of the specified <paramref name="bytes"/> by checking for the BOM header of various unicode encodings.
+        /// </summary>
+        /// <param name="bytes">The bytes to check.</param>
+        /// <returns>An instance of <see cref="Encoding"/> if successful; otherwise, <c>null</c>.</returns>
+        /// <see>
+        ///     <cref>https://stackoverflow.com/a/19283954</cref>
+        /// </see>
+        private static Encoding GetEncodingByBom(byte[] bytes) {
+            if (bytes == null || bytes.Length < 4) return null;
+            if (bytes[0] == 0x2b && bytes[1] == 0x2f && bytes[2] == 0x76) return Encoding.UTF7;
+            if (bytes[0] == 0xef && bytes[1] == 0xbb && bytes[2] == 0xbf) return Encoding.UTF8;
+            if (bytes[0] == 0xff && bytes[1] == 0xfe && bytes[2] == 0 && bytes[3] == 0) return Encoding.UTF32;
+            if (bytes[0] == 0xff && bytes[1] == 0xfe) return Encoding.Unicode;
+            if (bytes[0] == 0xfe && bytes[1] == 0xff) return Encoding.BigEndianUnicode;
+            if (bytes[0] == 0 && bytes[1] == 0 && bytes[2] == 0xfe && bytes[3] == 0xff) return new UTF32Encoding(true, true);
+            return null;
+        }
+
+        /// <summary>
+        /// Attemps to find the encoding of the specified <paramref name="bytes"/> by certain special characters are
+        /// successfully converted using different encodings.
+        /// </summary>
+        /// <param name="bytes">The bytes to check.</param>
+        /// <param name="plainText">When this method returns, holds the plain text string represented by <paramref name="bytes"/> if successful; otherwise, <c>null</c>.</param>
+        /// <returns>An instance of <see cref="Encoding"/> if successful; otherwise, <c>null</c>.</returns>
+        /// <remarks>This method may be expensive as worst case scenario is that the method will run through each byte
+        /// in <paramref name="bytes"/> one time for each encoding the method is checking against. Using Big O notation,
+        /// the performance can be described like O(N * M) where N is the length of <paramref name="bytes"/> and M is
+        /// the encodings that the method is checking against (currently two). Based on this, we can determine that
+        /// iterations increase linearly, which is not super bad, but it might still include a lot of iterations as
+        /// <paramref name="bytes"/> grow.</remarks>
+        private static Encoding GetEncodingBySeek(byte[] bytes, out string plainText) {
+
+            plainText = Encoding.UTF8.GetString(bytes);
+            if (plainText.Any(chr => _characters.Contains(chr))) return Encoding.UTF8;
+
+            plainText = Encoding.GetEncoding(1252).GetString(bytes);
+            if (plainText.Any(chr => _characters.Contains(chr))) return Encoding.GetEncoding(1252);
+
+            plainText = null;
+            return null;
+
+        }
+
+        /// <summary>
+        /// Defines a set of reference characters that we'll check against to determine the encoding.
+        /// </summary>
+        private static readonly HashSet<char> _characters = new() {
+            'Ç', // Latin Capital Letter C With Cedilla
+            'ü', // Latin Small Letter U With Diaeresis
+            'é', // Latin Small Letter E With Acute
+            'â', // Latin Small Letter A With Circumflex
+            'ä', // Latin Small Letter A With Diaeresis
+            'à', // Latin Small Letter A With Grave
+            'å', // Latin Small Letter A With Ring Above
+            'ç', // Latin Small Letter C With Cedilla
+            'ê', // Latin Small Letter E With Circumflex
+            'ë', // Latin Small Letter E With Diaeresis
+            'è', // Latin Small Letter E With Grave
+            'ï', // Latin Small Letter I With Diaeresis
+            'î', // Latin Small Letter I With Circumflex
+            'ì', // Latin Small Letter I With Grave
+            'Ä', // Latin Capital Letter A With Diaeresis
+            'Å', // Latin Capital Letter A With Ring Above
+            'É', // Latin Capital Letter E With Acute
+            'æ', // Latin Small Letter Ae
+            'Æ', // Latin Capital Letter Ae
+            'ô', // Latin Small Letter O With Circumflex
+            'ö', // Latin Small Letter O With Diaeresis
+            'ò', // Latin Small Letter O With Grave
+            'û', // Latin Small Letter U With Circumflex
+            'ù', // Latin Small Letter U With Grave
+            'ÿ', // Latin Small Letter Y With Diaeresis
+            'Ö', // Latin Capital Letter O With Diaeresis
+            'Ü', // Latin Capital Letter U With Diaeresis
+            'á', // Latin Small Letter A With Acute
+            'í', // Latin Small Letter I With Acute
+            'ó', // Latin Small Letter O With Acute
+            'ú', // Latin Small Letter U With Acute
+            'ñ', // Latin Small Letter N With Tilde, Small Letter Enye
+            'Ñ', // Latin Capital Letter N With Tilde, Capital Letter Enye,
+            'ø',
+            'Ø',
+            '¿'
+        };
 
         #endregion
 

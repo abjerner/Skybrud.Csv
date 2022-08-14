@@ -6,6 +6,13 @@
     public enum CsvSeparator {
 
         /// <summary>
+        /// For load operations, this will indicate that <see cref="CsvFile"/> should automatically try to detect the encoding - eg. based on the BOM header of the file if present.
+        ///
+        /// This value shouldn't be used for save operations. If it is, <see cref="CsvFile.DefaultSeparator"/> will be used instead.
+        /// </summary>
+        Auto,
+
+        /// <summary>
         /// Indicates that the separator is a comma.
         /// </summary>
         Comma,
