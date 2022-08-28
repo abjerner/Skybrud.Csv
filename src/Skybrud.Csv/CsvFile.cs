@@ -646,8 +646,21 @@ namespace Skybrud.Csv {
             plainText = Encoding.UTF8.GetString(bytes);
             if (plainText.Any(chr => _characters.Contains(chr))) return Encoding.UTF8;
 
-            plainText = Encoding.GetEncoding(1252).GetString(bytes);
-            if (plainText.Any(chr => _characters.Contains(chr))) return Encoding.GetEncoding(1252);
+            try {
+                Encoding encoding = Encoding.GetEncoding(1252);
+                plainText = encoding.GetString(bytes);
+                if (plainText.Any(chr => _characters.Contains(chr))) return encoding;
+            } catch (Exception) {
+                // ignore
+            }
+
+            try {
+                Encoding encoding = Encoding.GetEncoding("iso-8859-1");
+                plainText = encoding.GetString(bytes);
+                if (plainText.Any(chr => _characters.Contains(chr))) return encoding;
+            } catch (Exception) {
+                // ignore
+            }
 
             plainText = null;
             return null;
