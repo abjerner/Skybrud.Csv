@@ -1,9 +1,7 @@
 ﻿using System.Text;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Skybrud.Csv;
-using TestProject1;
 
-namespace UnitTestProject1 {
+namespace TestProject1 {
 
     [TestClass]
     public class EncodingTests {
