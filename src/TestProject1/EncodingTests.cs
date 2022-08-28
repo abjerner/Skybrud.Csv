@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Skybrud.Csv;
+using TestProject1;
 
 namespace UnitTestProject1 {
 
@@ -8,14 +9,14 @@ namespace UnitTestProject1 {
     public class EncodingTests {
 
         [TestMethod]
-        public void LoadDetectEncodingWindows1252() {
+        public void LoadDetectEncodingIso8859() {
 
             // In .NET Framework, the file's encoding will be detected to be "Windows 1252", while in .NET, the same
             // file's encoding wil be detected to be "ISO 8859-1".
 
             CsvFile csv = CsvFile.Load(IOHelper.MapPath("~/SampleData/SampleWindows1252.csv"));
 
-            Assert.AreEqual(Encoding.GetEncoding(1252), csv.Encoding);
+            Assert.AreEqual(Encoding.GetEncoding("iso-8859-1"), csv.Encoding);
 
             Assert.AreEqual(4, csv.Columns.Length);
             Assert.AreEqual(1, csv.Rows.Length);
