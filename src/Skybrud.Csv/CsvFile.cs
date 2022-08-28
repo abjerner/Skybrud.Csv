@@ -413,6 +413,7 @@ namespace Skybrud.Csv {
         private static CsvFile ParseInternal(CsvFile file, string contents) {
 
             // Normalize line endings
+            // TODO: Might be a bit too much and affect performance badly
             contents = contents.Replace("\r\n", "\n");
             contents = contents.Replace("\r", "\n");
 
