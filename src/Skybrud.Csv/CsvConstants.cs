@@ -1,4 +1,6 @@
-﻿namespace Skybrud.Csv {
+﻿using System;
+
+namespace Skybrud.Csv {
 
     internal static class CsvConstants {
 
@@ -6,11 +8,16 @@
 
         public const char Comma = ',';
 
+        public const char Semicolon = ';';
+
+        [Obsolete("Use 'Semicolon' instead.")]
         public const char SemiColon = ';';
 
         public const char Space = ' ';
 
         public const char Tab = '\t';
+
+        public const char Pipe = '|';
 
         public const char DoubleQuote = '"';
 
@@ -25,7 +32,7 @@
         };
 
         public static readonly char[] Separators = {
-            Colon, Comma, SemiColon, Space, Tab
+            Colon, Comma, Semicolon, Space, Tab, Pipe
         };
 
     }

@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
+#pragma warning disable CS0618 // Type or member is obsolete
+
 using static Skybrud.Csv.CsvConstants;
 
 namespace Skybrud.Csv {
@@ -18,10 +20,10 @@ namespace Skybrud.Csv {
         /// <summary>
         /// Gets the default CSV separator.
         /// </summary>
-        public const CsvSeparator DefaultSeparator = CsvSeparator.SemiColon;
+        public const CsvSeparator DefaultSeparator = CsvSeparator.Semicolon;
 
         /// <summary>
-        /// Gets tghe default encoding.
+        /// Gets the default encoding.
         /// </summary>
         public static Encoding DefaultEncoding => Encoding.UTF8;
 
@@ -30,7 +32,7 @@ namespace Skybrud.Csv {
         #region Properties
 
         /// <summary>
-        /// Gets or sets the seperator used in the CSV file.
+        /// Gets or sets the separator used in the CSV file.
         /// </summary>
         public CsvSeparator Separator { get; set; }
 
@@ -171,7 +173,7 @@ namespace Skybrud.Csv {
         }
 
         /// <summary>
-        /// Helper method for escaping special characters (eg. double quotes and line breaks). If the value contains
+        /// Helper method for escaping special characters (e.g. double quotes and line breaks). If the value contains
         /// any characters that should be escaped, the value will be enclosed with double quotes. The value will not be
         /// modified if it doesn't contain invalid characters.
         /// </summary>
@@ -192,7 +194,7 @@ namespace Skybrud.Csv {
         }
 
         /// <summary>
-        /// Saves the CSV file to it's original path.
+        /// Saves the CSV file to its original path.
         /// </summary>
         /// <returns>The original instance of <see cref="CsvFile"/>.</returns>
         public CsvFile Save() {
@@ -480,7 +482,7 @@ namespace Skybrud.Csv {
 
             int offset = 0;
 
-            // Does the first line specify the seprartor?
+            // Does the first line specify the separator?
             if (contents.Length > 4 && contents[0] == 's' && contents[1] == 'e' && contents[2] == 'p' && contents[3] == '=') {
                 if (IsSeparator(contents[4])) {
                     separator = contents[4];
@@ -555,10 +557,12 @@ namespace Skybrud.Csv {
             return separator switch {
                 CsvSeparator.Comma => Comma,
                 CsvSeparator.Colon => Colon,
-                CsvSeparator.SemiColon => SemiColon,
+                CsvSeparator.Semicolon => Semicolon,
+                CsvSeparator.SemiColon => Semicolon,
                 CsvSeparator.Space => Space,
                 CsvSeparator.Tab => Tab,
-                _ => SemiColon
+                CsvSeparator.Pipe => Pipe,
+                _ => Semicolon
             };
         }
 
@@ -566,9 +570,10 @@ namespace Skybrud.Csv {
             return character switch {
                 Colon => CsvSeparator.Colon,
                 Comma => CsvSeparator.Comma,
-                SemiColon => CsvSeparator.SemiColon,
+                Semicolon => CsvSeparator.Semicolon,
                 Space => CsvSeparator.Space,
                 Tab => CsvSeparator.Tab,
+                Pipe => CsvSeparator.Pipe,
                 _ => throw new CsvException($"Unknown separator: {character}")
             };
         }
@@ -589,8 +594,8 @@ namespace Skybrud.Csv {
                     separator = CsvSeparator.Comma;
                     return true;
 
-                case SemiColon:
-                    separator = CsvSeparator.SemiColon;
+                case Semicolon:
+                    separator = CsvSeparator.Semicolon;
                     return true;
 
                 case Space:
@@ -599,6 +604,10 @@ namespace Skybrud.Csv {
 
                 case Tab:
                     separator = CsvSeparator.Tab;
+                    return true;
+
+                case Pipe:
+                    separator = CsvSeparator.Pipe;
                     return true;
 
                 default:
@@ -629,7 +638,7 @@ namespace Skybrud.Csv {
         }
 
         /// <summary>
-        /// Attemps to find the encoding of the specified <paramref name="bytes"/> by certain special characters are
+        /// Attempts to find the encoding of the specified <paramref name="bytes"/> by certain special characters are
         /// successfully converted using different encodings.
         /// </summary>
         /// <param name="bytes">The bytes to check.</param>
