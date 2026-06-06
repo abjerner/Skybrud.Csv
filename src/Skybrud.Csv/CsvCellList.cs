@@ -9,7 +9,7 @@ namespace Skybrud.Csv;
 /// </summary>
 public class CsvCellList : IEnumerable<CsvCell> {
 
-    private readonly List<CsvCell> _cells = new();
+    private readonly List<CsvCell> _cells = [];
 
     #region Properties
 

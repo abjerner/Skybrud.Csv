@@ -160,7 +160,7 @@ public class CsvRow {
     }
 
     /// <summary>
-    /// Saves the CSV file to it's original path.
+    /// Saves the CSV file to its original path.
     /// </summary>
     /// <returns>The original instance of <see cref="CsvFile"/>.</returns>
     public CsvFile Save() {

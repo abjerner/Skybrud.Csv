@@ -679,7 +679,7 @@ public partial class CsvFile {
     /// <summary>
     /// Defines a set of reference characters that we'll check against to determine the encoding.
     /// </summary>
-    private static readonly HashSet<char> _characters = new() {
+    private static readonly HashSet<char> _characters = [
         'Ç', // Latin Capital Letter C With Cedilla
         'ü', // Latin Small Letter U With Diaeresis
         'é', // Latin Small Letter E With Acute
@@ -716,7 +716,7 @@ public partial class CsvFile {
         'ø',
         'Ø',
         '¿'
-    };
+    ];
 
     #endregion
 

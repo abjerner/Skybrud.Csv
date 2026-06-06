@@ -27,12 +27,12 @@ internal static class CsvConstants {
 
     public const char ZeroWidthNoBreakSpace = (char) 65279;
 
-    public static readonly char[] WhiteSpaceCharacters = {
+    public static readonly char[] WhiteSpaceCharacters = [
         Space, Tab, NewLine, CarriageReturn, ZeroWidthNoBreakSpace
-    };
+    ];
 
-    public static readonly char[] Separators = {
+    public static readonly char[] Separators = [
         Colon, Comma, Semicolon, Space, Tab, Pipe
-    };
+    ];
 
 }
