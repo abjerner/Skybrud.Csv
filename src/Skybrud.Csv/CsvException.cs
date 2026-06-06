@@ -1,18 +1,16 @@
 ﻿using System;
 
-namespace Skybrud.Csv {
+namespace Skybrud.Csv;
+
+/// <summary>
+/// Exception class used throughout this package.
+/// </summary>
+public class CsvException : Exception {
 
     /// <summary>
-    /// Exception class used throughout this package.
+    /// Initializes a new exception with the specified <paramref name="message"/>.
     /// </summary>
-    public class CsvException : Exception {
-
-        /// <summary>
-        /// Initializes a new exception with the specified <paramref name="message"/>.
-        /// </summary>
-        /// <param name="message">The error message.</param>
-        public CsvException(string message) : base(message) { }
-
-    }
+    /// <param name="message">The error message.</param>
+    public CsvException(string message) : base(message) { }
 
 }
